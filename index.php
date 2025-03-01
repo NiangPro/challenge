@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 session_start();
 require_once("views/includes/fonctions.php");
@@ -28,13 +28,10 @@ if (isset($_GET["page"])) {
       require_once("controllers/dashboardcontroller.php");
       break;
     default:
-        require_once("controllers/homecontroller.php");
+      require_once("controllers/homecontroller.php");
       break;
   }
-}else{
+} else {
 
   require_once("controllers/homecontroller.php");
 }
-
-
-

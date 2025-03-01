@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if (!isset($_SESSION["user"])) {
     return header("Location:?page=home");
@@ -12,26 +12,24 @@ if (isset($_POST["ajouter"])) {
             setmessage("Ajout challenge avec succès");
             return header("Location:?page=challenge");
         }
-    }else{
+    } else {
         setmessage("Veuillez remplir tous les champs", "danger");
         return header("Location:?page=challenge&type=add");
     }
-
 }
 
 if (isset($_POST["ajouterParticipant"])) {
     extract($_POST);
 
     if (notEmpty([$prenom, $nom, $cohorte_id])) {
-        if (ajouterParticipant($prenom, $nom, $cohorte_id, $_GET["id"])) {
+        if (ajouterParticipant($prenom, $nom, $cohorte_id, $_GET["id"], null)) {
             setmessage("Ajout participant avec succès");
-            return header("Location:?page=challenge&type=edit&id=".$_GET["id"]);
+            return header("Location:?page=challenge&type=edit&id=" . $_GET["id"]);
         }
-    }else{
+    } else {
         setmessage("Veuillez remplir tous les champs", "danger");
-        return header("Location:?page=challenge&type=edit&id=".$_GET["id"]."&sous=add");
+        return header("Location:?page=challenge&type=edit&id=" . $_GET["id"] . "&sous=add");
     }
-
 }
 
 if (isset($_GET["statut"])) {
@@ -41,14 +39,13 @@ if (isset($_GET["statut"])) {
                 setmessage("Challenge validé avec succès");
                 return header("Location:?page=challenge");
             }
-        }elseif($_GET["statut"] == "terminer"){
+        } elseif ($_GET["statut"] == "terminer") {
             if (changerStatut($_GET["id"], 2)) {
                 setmessage("Challenge terminé");
                 return header("Location:?page=challenge");
             }
         }
     }
-    
 }
 
 if (isset($_GET["delete"])) {
@@ -66,13 +63,13 @@ if (isset($_GET["tirer"])) {
 
     if (count($mats) > 0) {
         setmessage("Il y a des matches en cours", "warning");
-    }else{
+    } else {
         $teams = participants($_GET["id"]);
 
         if (count($teams) > 0) {
             // Mélanger aléatoirement les équipes
             shuffle($teams);
-            
+
             /// Vérifier si le nombre d'équipes est impair
             $bye_team = null;
             if (count($teams) % 2 !== 0) {
@@ -90,25 +87,21 @@ if (isset($_GET["tirer"])) {
                 ajouterMatch($match[0]->id, $match[1]->id, $_GET["id"]);
             }
 
-            // Afficher l'équipe qui passe directement au tour suivant
+            // Afficher le participant qui passe directement au tour suivant
             if ($bye_team) {
                 ajouterMatch($bye_team->id, null, $_GET["id"], $bye_team->id, 1);
 
                 setmessage("Tirage effectué, {$bye_team->prenom} {$bye_team->nom} est automatiquement qualifié(e) pour le prochain tour.");
-
-            }else{
+            } else {
                 setmessage("Tirage effectué");
             }
-        }else{
+        } else {
             setmessage("Aucun participant pour le moment", "danger");
         }
-    
-        
     }
-    
+
 
     return header("Location:?page=challenge");
-
 }
 
 if (isset($_GET["idgagnant"])) {
@@ -128,20 +121,16 @@ if (isset($_GET["type"])) {
         $participants = participants($c->id);
         $last = dernierChallenge($_GET["id"]);
         if ($last) {
-           $matches = matches($last->id);
-           if (count($matches) == 1) {
-            if ($matches[0]->statut == 1) {
-                $gagnant = participant($matches[0]->gagnant_id);
+            $matches = matches($last->id);
+            if (count($matches) == 1) {
+                if ($matches[0]->statut == 1) {
+                    $gagnant = participant($matches[0]->gagnant_id);
+                }
             }
-           }
         }
-       
     }
     require_once("views/challenge/add.php");
-}else{
+} else {
     require_once("views/challenge/challenge.php");
 }
 require_once("views/includes/footer.php");
-
-
-

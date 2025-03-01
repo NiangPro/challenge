@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-$dsn = 'mysql:host=localhost;dbname=duel_app;charset=utf8';
+$dsn = 'mysql:host=localhost;dbname=challenge;charset=utf8';
 $username = 'root';
 $password = '';
 
@@ -13,7 +13,8 @@ try {
     setmessage("Erreur de connexion : " . $e->getMessage(), "danger");
 }
 
-function seconnecter($email){
+function seconnecter($email)
+{
     global $db;
 
     try {
@@ -22,11 +23,12 @@ function seconnecter($email){
 
         return $q->fetch();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function participants($idchallenge){
+function participants($idchallenge)
+{
     global $db;
 
     try {
@@ -36,11 +38,12 @@ function participants($idchallenge){
 
         return $q->fetchAll();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function participant($id){
+function participant($id)
+{
     global $db;
 
     try {
@@ -50,40 +53,42 @@ function participant($id){
 
         return $q->fetch();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function ajouterParticipant($prenom, $nom, $cohorte_id, $challenge_id){
+function ajouterParticipant($prenom, $nom, $cohorte_id, $challenge_id, $existant)
+{
     global $db;
 
     try {
-        $q = $db->prepare("INSERT INTO participant(prenom, nom, cohorte_id, challenge_id) VALUES(:prenom, :nom, :cohorte_id, :challenge_id)");
+        $q = $db->prepare("INSERT INTO participant(prenom, nom, cohorte_id, challenge_id, existant) VALUES(:prenom, :nom, :cohorte_id, :challenge_id, :existant)");
         return $q->execute([
             "prenom" => ucfirst($prenom),
             "nom" => ucfirst($nom),
             "cohorte_id" => $cohorte_id,
             "challenge_id" => $challenge_id,
+            "existant" => $existant,
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function supprimerMatches($challenge_id){
+function supprimerMatches($challenge_id)
+{
     global $db;
 
     try {
         $q = $db->prepare("DELETE FROM matches WHERE challenge_id =:challenge_id");
         return $q->execute(["challenge_id" => $challenge_id]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function matches($idchallenge){
+function matches($idchallenge)
+{
     global $db;
 
     try {
@@ -92,11 +97,12 @@ function matches($idchallenge){
 
         return $q->fetchAll();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function parcours($idpart){
+function parcours($idpart)
+{
     global $db;
 
     try {
@@ -109,11 +115,12 @@ function parcours($idpart){
 
         return $q->fetch();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function cursus($idpart){
+function cursus($idpart)
+{
     global $db;
 
     try {
@@ -126,11 +133,12 @@ function cursus($idpart){
 
         return $q->fetchAll();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function ajouterMatch($id_part1, $id_part2, $challenge_id, $gagnant = null, $statut = 0){
+function ajouterMatch($id_part1, $id_part2, $challenge_id, $gagnant = null, $statut = 0)
+{
     global $db;
 
     try {
@@ -142,13 +150,13 @@ function ajouterMatch($id_part1, $id_part2, $challenge_id, $gagnant = null, $sta
             "gagnant" => $gagnant,
             "statut" => $statut,
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function gagner($id, $gagnant){
+function gagner($id, $gagnant)
+{
     global $db;
 
     try {
@@ -158,13 +166,13 @@ function gagner($id, $gagnant){
             "gagnant" => $gagnant,
             "statut" => 1,
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function ajouterCohorte($nom){
+function ajouterCohorte($nom)
+{
     global $db;
 
     try {
@@ -172,13 +180,13 @@ function ajouterCohorte($nom){
         return $q->execute([
             "nom" => ucfirst($nom),
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function cohortes(){
+function cohortes()
+{
     global $db;
 
     try {
@@ -187,11 +195,12 @@ function cohortes(){
 
         return $q->fetchAll();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function cohorte($id){
+function cohorte($id)
+{
     global $db;
 
     try {
@@ -201,13 +210,13 @@ function cohorte($id){
         ]);
 
         return $q->fetch();
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function challenges(){
+function challenges()
+{
     global $db;
 
     try {
@@ -216,11 +225,12 @@ function challenges(){
 
         return $q->fetchAll();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function dernierChallenge($parent_id){
+function dernierChallenge($parent_id)
+{
     global $db;
 
     try {
@@ -229,23 +239,24 @@ function dernierChallenge($parent_id){
 
         return $q->fetch();
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function supprimerChallenge($id){
+function supprimerChallenge($id)
+{
     global $db;
 
     try {
         $q = $db->prepare("DELETE FROM challenges WHERE id =:id");
         return $q->execute(["id" => $id]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function ajouterChallenge($nom, $debut, $statut = 0){
+function ajouterChallenge($nom, $debut, $statut = 0)
+{
     global $db;
 
     try {
@@ -255,14 +266,14 @@ function ajouterChallenge($nom, $debut, $statut = 0){
             "debut" => $debut,
             "statut" => $statut,
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
 
-function changerStatut($id, $statut){
+function changerStatut($id, $statut)
+{
     global $db;
 
     try {
@@ -271,13 +282,13 @@ function changerStatut($id, $statut){
             "statut" => $statut,
             "id" => $id,
         ]);
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function challenge($id){
+function challenge($id)
+{
     global $db;
 
     try {
@@ -287,13 +298,13 @@ function challenge($id){
         ]);
 
         return $q->fetch();
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
 
-function verifierChallenge($id){
+function verifierChallenge($id)
+{
     global $db;
 
     try {
@@ -304,8 +315,7 @@ function verifierChallenge($id){
         ]);
 
         return $q->fetchALL();
-
     } catch (PDOException $th) {
-        setmessage("Erreur: ".$th->getMessage()." a la ligne: ".__LINE__, "danger");
+        setmessage("Erreur: " . $th->getMessage() . " a la ligne: " . __LINE__, "danger");
     }
 }
