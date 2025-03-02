@@ -41,11 +41,13 @@
                     <td>
                     <?php if($c->statut == 0): ?>
                         <a href="?page=challenge&statut=valider&id=<?= $c->id ?>" class="btn btn-success btn-sm rounded-pill"><i class="fa fa-check" title="activer"></i></a>
-                        <a href="?page=challenge&tirer&id=<?= $c->id ?>" class="btn btn-primary btn-sm rounded-pill"><i class="fa fa-crosshairs" title="tirer"></i></a>
                     <?php endif; ?>
 
                     <?php if($c->statut == 1): ?>
+                        <?php if(!hasUnplayedMatches($c->id)): ?>
                         <a href="?page=challenge&tirer&id=<?= $c->id ?>" class="btn btn-primary btn-sm rounded-pill"><i class="fa fa-crosshairs" title="tirer"></i></a>
+                        <?php endif; ?>
+                        <a href="?page=challenge&type=tournament&id=<?= $c->id ?>" class="btn btn-info btn-sm rounded-pill"><i class="fa fa-sitemap" title="Voir l'arbre du tournoi"></i></a>
                         <a href="?page=challenge&statut=terminer&id=<?= $c->id ?>" class="btn btn-warning btn-sm rounded-pill"><i class="fa fa-stopwatch" title="activer"></i></a>
                     <?php endif; ?>
                     <!-- <a href="?page=challenge&statut=valider&id=<?= $c->id ?>" class="btn btn-success btn-sm rounded-pill"><i class="fa fa-check" title="activer"></i></a> -->

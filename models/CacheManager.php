@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use Redis;
-
 /**
  * Gestionnaire de cache avec support Redis et fichier
  */

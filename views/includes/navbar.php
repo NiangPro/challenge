@@ -24,7 +24,7 @@
       <!-- Left links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" href="#">Tableau de bord</a>
+          <a class="nav-link" href="?page=dashboard">Tableau de bord</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="?page=challenge">Challenges</a>
@@ -51,33 +51,8 @@
       </a>
 
       <!-- Notifications -->
-      <div class="dropdown">
-        <a
-          data-mdb-dropdown-init
-          class="text-reset me-3 dropdown-toggle hidden-arrow"
-          href="#"
-          id="navbarDropdownMenuLink"
-          role="button"
-          aria-expanded="false"
-        >
-          <i class="fas fa-bell"></i>
-          <span class="badge rounded-pill badge-notification bg-danger">1</span>
-        </a>
-        <ul
-          class="dropdown-menu dropdown-menu-end"
-          aria-labelledby="navbarDropdownMenuLink"
-        >
-          <li>
-            <a class="dropdown-item" href="#">Tableau de bord</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#">Candidats</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#">Something else here</a>
-          </li>
-        </ul>
-      </div>
+      <?php require_once("views/includes/notifications.php"); ?>
+      
       <!-- Avatar -->
       <div class="dropdown">
         <a

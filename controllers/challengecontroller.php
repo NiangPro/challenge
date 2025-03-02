@@ -59,55 +59,109 @@ if (isset($_GET["delete"])) {
 }
 
 if (isset($_GET["tirer"])) {
+    // Vérifier si le challenge est en cours (statut = 1)
+    $challenge = challenge($_GET["id"]);
+    if ($challenge->statut != 1) {
+        setmessage("Le challenge doit être en cours pour effectuer un tirage", "warning");
+        return header("Location:?page=challenge");
+    }
+
+    // Vérifier s'il y a des matchs non joués
     $mats = matches($_GET["id"]);
+    $unplayedMatches = false;
+    foreach ($mats as $match) {
+        if ($match->statut == 0) {
+            $unplayedMatches = true;
+            break;
+        }
+    }
 
-    if (count($mats) > 0) {
+    if ($unplayedMatches) {
         setmessage("Il y a des matches en cours", "warning");
-    } else {
-        $teams = participants($_GET["id"]);
+        return header("Location:?page=match&challenge=" . $_GET["id"]);
+    }
 
+    try {
+        global $db;
+        $db->beginTransaction();
+
+        // Récupérer le tour actuel du challenge
+        $currentTour = $challenge->tour ?? 1;
+        error_log("Tirage pour le tour " . $currentTour);
+
+        $teams = participants($_GET["id"]);
         if (count($teams) > 0) {
             // Mélanger aléatoirement les équipes
             shuffle($teams);
 
-            /// Vérifier si le nombre d'équipes est impair
+            // Vérifier si le nombre d'équipes est impair
             $bye_team = null;
             if (count($teams) % 2 !== 0) {
-                // Sélectionner une équipe aléatoire qui passe directement au tour suivant
                 $bye_team = array_pop($teams);
             }
 
-            // Former les matchs
-            $matches = array_chunk($teams, 2);
-            // print_r($bye_team);
-            // die();
-
-
-            foreach ($matches as $match) {
-                ajouterMatch($match[0]->id, $match[1]->id, $_GET["id"]);
+            // Former les paires pour les matchs
+            for ($i = 0; $i < count($teams); $i += 2) {
+                if (isset($teams[$i + 1])) {
+                    // Créer un match entre deux participants
+                    $stmt = $db->prepare("
+                        INSERT INTO matches(id_part1, id_part2, challenge_id, statut, tour) 
+                        VALUES(?, ?, ?, 0, ?)
+                    ");
+                    $stmt->execute([
+                        $teams[$i]->id,
+                        $teams[$i + 1]->id,
+                        $_GET["id"],
+                        $currentTour
+                    ]);
+                    error_log("Match créé : {$teams[$i]->prenom} vs {$teams[$i + 1]->prenom} pour le tour {$currentTour}");
+                }
             }
 
-            // Afficher le participant qui passe directement au tour suivant
+            // Gérer le participant qui passe directement au tour suivant (cas impair)
             if ($bye_team) {
-                ajouterMatch($bye_team->id, null, $_GET["id"], $bye_team->id, 1);
+                $stmt = $db->prepare("
+                    INSERT INTO matches(id_part1, id_part2, challenge_id, gagnant_id, statut, tour) 
+                    VALUES(?, NULL, ?, ?, 1, ?)
+                ");
+                $stmt->execute([
+                    $bye_team->id,
+                    $_GET["id"],
+                    $bye_team->id,
+                    $currentTour
+                ]);
+                error_log("Match créé pour {$bye_team->prenom} (qualifié directement) pour le tour {$currentTour}");
 
-                setmessage("Tirage effectué, {$bye_team->prenom} {$bye_team->nom} est automatiquement qualifié(e) pour le prochain tour.");
-            } else {
-                setmessage("Tirage effectué");
+                // Créer une notification
+                createNotification(
+                    0, 
+                    "{$bye_team->prenom} {$bye_team->nom} est automatiquement qualifié(e) pour le prochain tour du tournoi.", 
+                    "info", 
+                    "?page=match&challenge=" . $_GET["id"]
+                );
             }
+
+            $db->commit();
+            setmessage(
+                $bye_team 
+                    ? "Tirage effectué. {$bye_team->prenom} {$bye_team->nom} est automatiquement qualifié(e)." 
+                    : "Tirage effectué avec succès"
+            );
         } else {
             setmessage("Aucun participant pour le moment", "danger");
         }
+    } catch (Exception $e) {
+        $db->rollBack();
+        error_log("Erreur lors du tirage : " . $e->getMessage());
+        setmessage("Une erreur est survenue lors du tirage : " . $e->getMessage(), "danger");
     }
-
-
-    return header("Location:?page=challenge");
+    
+    return header("Location:?page=match&challenge=" . $_GET["id"]);
 }
 
 if (isset($_GET["idgagnant"])) {
     $games = monParcours($_GET["idgagnant"]);
 }
-
 
 $challenges = challenges();
 $cohortes = cohortes();
@@ -129,8 +183,16 @@ if (isset($_GET["type"])) {
             }
         }
     }
-    require_once("views/challenge/add.php");
+    
+    if ($_GET["type"] === "tournament" && isset($_GET["id"])) {
+        // Debug
+        error_log("Affichage de l'arbre du tournoi pour le challenge " . $_GET["id"]);
+        require_once("views/challenge/tournament.php");
+    } else {
+        require_once("views/challenge/add.php");
+    }
 } else {
     require_once("views/challenge/challenge.php");
 }
+
 require_once("views/includes/footer.php");

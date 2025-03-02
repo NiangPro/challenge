@@ -1,58 +1,194 @@
-<?php if (isset($matches)): ?>
-    <?php if (count($matches) > 0): ?>
-    <div class="card container mb-5" >
-        <div class="card-body">
-            <div class="row mb-3">
-                <!-- <h5 class="card-title col-md-8"> <?php //echo (count($matches) == 1 && count($etat) == 0) ? '🏆 Vainqueur 🏆' : "Liste des Matches à venir" ?></h5> -->
-                <h1 class="card-title col-md-8"><?= niveauChallenge($_GET["challenge"]) ?></h1>
-                <?php if (count($etat) == 0 && count($matches) > 1): ?>
-                <div class="col-md-4 text-end">
-                    <a href="?page=match&challenge=<?= $_GET['challenge'] ?>&next" class="btn btn-info btn-sm">Passer au prochain tour <i class="fa fa-arrow-right"></i> </a>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="row">
-                <?php foreach($matches as $m): ?>
-                    <div class="col-md-3 p-2">
-                        <div class="card <?php if(count($matches) == 1 && $m->statut == 1){ echo 'bg-info text-white';}else if($m->statut == 1){ echo 'bg-dark text-white';}else{ echo '';}  ?>">
-                            <div class="card-body text-center">
-                                <p>
-                                    <?= $m->statut == 0 ? afficheParticipant(participant($m->id_part1)) : afficheParticipant(participant($m->gagnant_id)) ?>
-                                    <?php if ($m->statut == 0): ?>
-                                    <br><a href="?page=match&challenge=<?= $_GET['challenge'] ?>&match=<?= $m->id ?>&gagnant=<?= $m->id_part1 ?>" class="btn btn-success btn-sm rounded-pill"><i class="fa fa-check" title="gagner"></i></a>
-                                    <?php endif; ?>
-                                </p>
-                                <?php if ($m->id_part2 && $m->statut == 0): ?>
-                                        <h5>Vs</h5>
-                                        <p>
-                                            <?= afficheParticipant(participant($m->id_part2)) ?>
-                                            <?php if ($m->statut == 0): ?>
-                                                <br><a href="?page=match&challenge=<?= $_GET['challenge'] ?>&match=<?= $m->id ?>&gagnant=<?= $m->id_part2 ?>" class="btn btn-success btn-sm rounded-pill"><i class="fa fa-check" title="gagner"></i></a>
-                                            <?php endif; ?>
-                                        </p>
-                                <?php elseif(count($matches) == 1 && $m->statut == 1): ?>
-                                    <h2 class="text-dark">Félicitations 🏆</h2>
-                                <?php elseif($m->id_part2 && $m->statut == 1): ?>
-                                        <span class="text-success">qualifié(e)</span>
-                                <?php else: ?>
-                                    <span class="text-success">Dèjà qualifié(e)</span>
-                                <?php endif; ?>
-
-                            </div>
+<?php if (isset($_GET["challenge"])) : ?>
+    <?php
+    $challenge = challenge($_GET["challenge"]);
+    $matchs = matches($_GET["challenge"]);
+    $matchsTermines = matchesHistorique($_GET["challenge"]);
+    ?>
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <?= niveauChallenge($_GET["challenge"]) ?>
+                                <small class="text-muted ms-2">Tour <?= $challenge->tour ?></small>
+                            </h3>
+                            <a href="?page=challenge" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour
+                            </a>
                         </div>
                     </div>
-                
-                <?php endforeach; ?>
+                    <div class="card-body">
+                        <div class="matches-container">
+                            <!-- Matchs en cours -->
+                            <div class="mb-5">
+                                <h4 class="tour-title">Matchs en Cours</h4>
+                                <div class="row">
+                                    <?php if (count($matchs) > 0) : ?>
+                                        <?php foreach ($matchs as $match) : ?>
+                                    <?php if ($match->statut == 0) : ?>
+
+                                            <?php
+                                            $part1 = participant($match->id_part1);
+                                            $part2 = $match->id_part2 ? participant($match->id_part2) : null;
+                                            ?>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="match-card position-relative">
+                                                    <div class="match-header">
+                                                        Match #<?= $match->id ?>
+                                                    </div>
+                                                    <div class="match-status status-ongoing">
+                                                        En cours
+                                                    </div>
+                                                    <div class="match-body">
+                                                        <div class="match-versus">
+                                                            <div class="match-player">
+                                                                <div class="match-player-name">
+                                                                    <?= $part1->prenom ?> <?= $part1->nom ?>
+                                                                </div>
+                                                                <div class="match-player-cohorte">
+                                                                    <?= $part1->nomcohorte ?>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <?php if ($part2) : ?>
+                                                                <div class="match-vs">VS</div>
+                                                                <div class="match-player">
+                                                                    <div class="match-player-name">
+                                                                        <?= $part2->prenom ?> <?= $part2->nom ?>
+                                                                    </div>
+                                                                    <div class="match-player-cohorte">
+                                                                        <?= $part2->nomcohorte ?>
+                                                                    </div>
+                                                                </div>
+                                                            <?php else : ?>
+                                                                <div class="match-player">
+                                                                    <div class="match-player-name text-muted">
+                                                                        <em>En attente...</em>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        
+                                                        <div class="match-actions">
+                                                            <a href="?page=match&gagnant=<?= $match->id_part1 ?>&match=<?= $match->id ?>&challenge=<?= $_GET["challenge"] ?>" 
+                                                               class="btn btn-winner">
+                                                                <i class="fas fa-trophy"></i>
+                                                                <?= $part1->prenom ?>
+                                                            </a>
+                                                            <?php if ($part2) : ?>
+                                                                <a href="?page=match&gagnant=<?= $match->id_part2 ?>&match=<?= $match->id ?>&challenge=<?= $_GET["challenge"] ?>" 
+                                                                   class="btn btn-winner">
+                                                                    <i class="fas fa-trophy"></i>
+                                                                    <?= $part2->prenom ?>
+                                                                </a>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php else : ?>
+                                        <div class="col-12">
+                                            <div class="alert alert-info text-center">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                Aucun match en cours
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- Matchs terminés -->
+                            <?php 
+                            $matchsTourActuel = array_filter($matchsTermines, function($m) use ($challenge) {
+                                return $m->tour == $challenge->tour;
+                            });
+                            
+                            if (count($matchsTourActuel) > 0) : 
+                            ?>
+                                <div>
+                                    <h4 class="tour-title">Matchs Terminés</h4>
+                                    <div class="row">
+                                        <?php foreach ($matchsTourActuel as $match) : ?>
+                                            <?php
+                                            $part1 = participant($match->id_part1);
+                                            $part2 = $match->id_part2 ? participant($match->id_part2) : null;
+                                            $gagnant = participant($match->gagnant_id);
+                                            ?>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="match-card position-relative">
+                                                    <div class="match-header">
+                                                        Match #<?= $match->id ?>
+                                                    </div>
+                                                    <div class="match-status status-completed">
+                                                        Terminé
+                                                    </div>
+                                                    <div class="match-body">
+                                                        <div class="match-versus">
+                                                            <div class="match-player">
+                                                                <div class="match-player-name <?= $match->gagnant_id == $part1->id ? 'text-success fw-bold' : '' ?>">
+                                                                    <?= $part1->prenom ?> <?= $part1->nom ?>
+                                                                </div>
+                                                                <div class="match-player-cohorte">
+                                                                    <?= $part1->nomcohorte ?>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <?php if ($part2) : ?>
+                                                                <div class="match-vs">VS</div>
+                                                                <div class="match-player">
+                                                                    <div class="match-player-name <?= $match->gagnant_id == $part2->id ? 'text-success fw-bold' : '' ?>">
+                                                                        <?= $part2->prenom ?> <?= $part2->nom ?>
+                                                                    </div>
+                                                                    <div class="match-player-cohorte">
+                                                                        <?= $part2->nomcohorte ?>
+                                                                    </div>
+                                                                </div>
+                                                            <?php else : ?>
+                                                                <div class="match-player">
+                                                                    <div class="match-player-name text-muted">
+                                                                        <em>Qualifié(e) directement</em>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        
+                                                        <div class="text-center mt-3">
+                                                            <div class="winner-badge">
+                                                                <i class="fas fa-trophy"></i>
+                                                                Gagnant : <?= $gagnant->prenom ?> <?= $gagnant->nom ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php 
+                            $matchsEnCours = count($matchs);
+                            $matchsTerminesTourActuel = count($matchsTourActuel);
+                            $totalMatchsTourActuel = $matchsEnCours + $matchsTerminesTourActuel;
+                            
+                            if ($totalMatchsTourActuel > 0 && $matchsEnCours == 0) : 
+                            ?>
+                                <div class="text-center mt-4">
+                                    <a href="?page=match&next&challenge=<?= $_GET["challenge"] ?>" 
+                                       class="next-tour-btn">
+                                        <i class="fas fa-forward me-2"></i>
+                                        Passer au tour suivant
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-<?php else: ?>
-    <div
-        class="alert alert-info container"
-        role="alert"
-    >
-        <strong>Aucun match pour le moment !</strong>
-    </div>
-    
-<?php endif; ?>
 <?php endif; ?>

@@ -51,20 +51,60 @@ function monParcours($idgagnant){
     return $matches;
 }
 
-function niveauChallenge($idchallenges){
-    $matches = matches($idchallenges);
+function allMatchesTermines($matches) {
+    foreach ($matches as $match) {
+        if ($match->statut == 0) {
+            return false;
+        }
+    }
+    return count($matches) > 0;
+}
 
-    if (count($matches) == 1) {
-        return "🏆 Finale 🏆";
-    }elseif (count($matches) == 2){
-        return "1/2 Finale";
-    }elseif (count($matches) <= 4){
-        return "1/4 Finale";
-    }elseif (count($matches) <= 8){
-        return "1/8 Finale";
-    }elseif (count($matches) <= 16){
-        return "1/16 Finale";
-    }else{
-        return "Tour préliminaire";
+function niveauChallenge($idchallenges){
+    global $db;
+    $challenge = challenge($idchallenges);
+    $tour = isset($challenge->tour) ? $challenge->tour : null;
+    
+    // Si le tour est défini dans la base de données, l'utiliser en priorité
+    if ($tour) {
+        $titre = match($tour) {
+            1 => "Premier tour",
+            2 => "Deuxième tour",
+            3 => "Quarts de finale ",
+            4 => "Demi-finales ",
+            5 => "Finale ",
+            default => "Tour " . $tour
+        };
+        return $titre;
+    }
+    
+    try {
+        // Compter d'abord le nombre total de matchs
+        $q = $db->prepare("SELECT COUNT(*) as total FROM matches WHERE challenge_id = :challenge_id");
+        $q->execute(["challenge_id" => $idchallenges]);
+        $result = $q->fetch();
+        $totalMatches = $result->total;
+        
+        // Compter les matchs actifs (non terminés)
+        $q = $db->prepare("SELECT COUNT(*) as active FROM matches WHERE challenge_id = :challenge_id AND statut = 0");
+        $q->execute(["challenge_id" => $idchallenges]);
+        $result = $q->fetch();
+        $activeMatches = $result->active;
+        
+        // Ajouter un log pour le débogage
+        error_log("Challenge ID: " . $idchallenges . ", Total matchs: " . $totalMatches . ", Matchs actifs: " . $activeMatches);
+        
+        // Déterminer le niveau en fonction du nombre total de matchs
+        return match(true) {
+            $totalMatches === 1 => "Finale ",
+            $totalMatches === 2 => "Demi-finales ",
+            $totalMatches === 3 || $totalMatches === 4 => "Quarts de finale ",
+            $totalMatches >= 5 && $totalMatches <= 8 => "Huitièmes de finale",
+            $totalMatches >= 9 && $totalMatches <= 16 => "Seizièmes de finale",
+            default => "Tour préliminaire"
+        };
+    } catch (PDOException $th) {
+        error_log("Erreur dans niveauChallenge: " . $th->getMessage());
+        return "Tour en cours";
     }
 }

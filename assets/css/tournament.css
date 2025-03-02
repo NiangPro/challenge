@@ -1,0 +1,143 @@
+.tournament-bracket {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 20px;
+    overflow-x: auto;
+    min-height: 500px;
+}
+
+.tournament-round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin: 0 20px;
+}
+
+.tournament-round-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.match-wrapper {
+    position: relative;
+    margin: 10px 0;
+}
+
+.match-container {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 220px;
+    margin: 15px 0;
+}
+
+.match-team {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.match-team:last-child {
+    border-bottom: none;
+}
+
+.match-team.winner {
+    background-color: #e8f5e9;
+    font-weight: bold;
+}
+
+.match-team.loser {
+    color: #999;
+}
+
+.match-score {
+    float: right;
+    font-weight: bold;
+}
+
+.match-connector {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    width: 20px;
+    height: 2px;
+    background: #ddd;
+}
+
+.match-connector::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 2px;
+    height: 100%;
+    background: #ddd;
+    transform: translateY(-50%);
+}
+
+.tournament-round:last-child .match-connector {
+    display: none;
+}
+
+.match-date {
+    font-size: 0.8em;
+    color: #666;
+    text-align: center;
+    padding: 5px;
+    border-top: 1px solid #eee;
+}
+
+.match-status {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+.match-status.ongoing {
+    background: #fff3e0;
+    color: #f57c00;
+    border: 1px solid #ffb74d;
+}
+
+.match-status.completed {
+    background: #e8f5e9;
+    color: #43a047;
+    border: 1px solid #81c784;
+}
+
+.match-vs {
+    background: #e74c3c;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 10px auto;
+}
+
+.tournament-bracket::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tournament-bracket::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.tournament-bracket::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.tournament-bracket::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
